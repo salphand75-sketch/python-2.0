@@ -1,0 +1,12 @@
+import random
+fn = (input("what is your first name "))
+ln = (input("what is your last name "))
+a = random.randint(1,10)
+un = (fn[0:-1]+"@"+"123"+ln[2:5])
+print(un)
+b = random.randint(0,2)
+c = random.randint(3,5)
+d = random.randint(0,2)
+e = random.randint(3,5)
+un2 = (fn[b:c]+ln[d:e]+str(a))
+print(un2)
