@@ -15,10 +15,17 @@ for i in grid:
     for j in i:
         print(j, end = " ")
     print()
+moves =[]
 while True:
     ans_p_r = int(input("Which row do you think is safe "))
     ans_p_c = int(input("Which colum do you think is safe "))
-    
+    if ans_p_r < 0 or ans_p_r > 4 or ans_p_c < 0 or ans_p_c > 4:
+        print("invalid move! row and collum must be between 0 and 4")
+        continue
+    if (ans_p_r, ans_p_c) in moves:
+        print("You already tried this move")
+        continue
+    moves.append((ans_p_r, ans_p_c))
     if (ans_p_r, ans_p_c) in bomb:
         print("You are dead")
         break
