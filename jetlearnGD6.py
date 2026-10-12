@@ -1,6 +1,6 @@
 import pgzrun
 import random
-
+resetshow = False
 game_over = False
 HEIGHT = 500
 WIDTH = 600
@@ -11,13 +11,22 @@ cat = Actor("2d_cat.png")
 cheese = Actor("cheese.png")
 mouse.pos = (250,250)
 cat.pos = (50, 50)
-reset.pos = (260,400)
-curser = (0,0)
+reset.pos = (300,360)
+cheese.pos = (random.randint(50, 550), random.randint(50, 450))
+curser = (250,250)
+
 dirx = random.randint(-1,1)
 diry = random.randint(-1,1)
 speed = 3
+def catai():
+     global dirx,diry
+     dirx = random.choice([-1,1])
+     diry = random.choice([-1,1])
+     clock.schedule(catai,random.randint(1,3))
 def update():
     global score,dirx,diry,game_over
+    if game_over:
+         return
     if mouse.colliderect(cat):
             game_over = True
             return
@@ -31,13 +40,13 @@ def update():
     if cat.x >= WIDTH - 50:
          dirx = -1
          diry = random.randint(-1,1)
-    if cat.x <= 0:
+    if cat.x <= 50:
          dirx = 1
          diry = random.randint(-1,1)
-    if cat.y <= 0:
+    if cat.y <= 50:
          diry = 1
          dirx = random.randint(-1,1)
-    if cat.y >= HEIGHT:
+    if cat.y >= HEIGHT - 50:
          diry = -1
          dirx = random.randint(-1,1)
 def on_mouse_move(pos):
@@ -45,25 +54,29 @@ def on_mouse_move(pos):
     if not game_over:
         curser = pos
 def on_mouse_down(pos):
-     global score,mouse,cat,curser,dirx,diry,game_over
-     if reset.collidepoint(pos): 
+     global score,mouse,cat,curser,dirx,diry,game_over,resetshow
+     if reset.collidepoint(pos) and resetshow == True: 
          game_over = False
          score = 0
-         mouse.pos = (pos)
+         mouse.pos = (250,250)
          cat.pos = (50, 50)
-         curser = (0,0)
+         curser = (250,250)
          dirx = random.randint(-1,1)
          diry = random.randint(-1,1)
+         resetshow = False
 speed = 3
 def draw():
+    global resetshow
     screen.blit("pgzbackground.jpg",(0,0))
     if game_over == True:
          screen.blit("game_over.png",(50,75))
          screen.draw.text("Your score: " + str(score),(240,300),color="black", fontsize =30)
          reset.draw()
+         resetshow = True
          return
     mouse.draw()
     cat.draw()
     cheese.draw()
     screen.draw.text("score: " + str(score),(450,10),color="black")
+catai()
 pgzrun.go()
