@@ -7,11 +7,13 @@ WIDTH = 650
 spaceship = Actor("spaceship.png")
 spaceship.pos = (325, 700) 
 
+health = 100
+wave_count = 0
 score = 0
 aliens = []
 bullets = []
 alien_bullets = []
-
+boss = None
 healthreduction = 0 
 hearts_left = 3
 heart1 = Actor("heart.png")
@@ -21,13 +23,25 @@ heart2.pos = (50,20)
 heart3 = Actor("heart.png")
 heart3.pos = (80,20)
 def alienspawn():
-    for i in range(6):
-        for j in range(10):
-            alien = Actor("alien.png")
-            alien.x = (j + 1) * 75 
-            alien.y = i * 50 - 50
-            aliens.append(alien)
-    clock.schedule(alienspawn, 18)
+    global wave_count, boss, health
+    if wave_count == 1:
+        health = 100
+        wave_count = 0
+        boss = Actor("alien-boss.png")
+        boss.pos = (325,100)
+        while wave_count == 0:
+            clock.schedule(alienspawn, 2)
+    elif boss == None:
+        for i in range(6):
+            for j in range(8):
+                alien = Actor("alien.png")
+                alien.x = (j + 1) * 75 
+                alien.y = i * 50 - 50
+                aliens.append(alien)
+        wave_count += 1  
+        clock.schedule(alienspawn, 18)    
+        
+    
 
 alienspawn()
 
@@ -48,6 +62,8 @@ def alien_shoot():
 
 def draw():
     screen.blit("space.jpg", (0, -100))
+    if boss != None:
+        boss.draw()
     for bullet in bullets:
         bullet.draw()
     for alien_bullet in alien_bullets:
@@ -74,7 +90,7 @@ def draw():
         
 
 def update():
-    global healthreduction, hearts_left, score
+    global healthreduction, hearts_left, score, boss, health
     if hearts_left == 0:
         return     
     if keyboard.a and spaceship.x > 25:
@@ -89,7 +105,18 @@ def update():
             if healthreduction == 10:
                 hearts_left = hearts_left - 1
                 healthreduction = 0
-    
+    if boss != None:
+        boss.y +=0.3
+        if boss.y > HEIGHT:
+            boss = None
+            hearts_left -2
+        for bullet in bullets[:]:
+            if bullet.colliderect(boss):
+                health -= 2
+                bullets.remove(bullet)
+        if health <= 0:
+            boss = None
+            score += 1000
     for bullet in bullets[:]:
         bullet.y -= 3
         if bullet.y < 0:
