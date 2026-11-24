@@ -12,6 +12,7 @@ wave_count = 0
 score = 0
 aliens = []
 bullets = []
+BossBullets = []
 alien_bullets = []
 boss = None
 healthreduction = 0 
@@ -29,8 +30,7 @@ def alienspawn():
         wave_count = 0
         boss = Actor("alien-boss.png")
         boss.pos = (325,100)
-        while wave_count == 0:
-            clock.schedule(alienspawn, 2)
+        clock.schedule(alienspawn, 36)   
     elif boss == None:
         for i in range(6):
             for j in range(8):
@@ -52,20 +52,28 @@ def on_key_down(key):
         bullets.append(bullet)
 
 def alien_shoot():
-    if  hearts_left >0:
+    if  hearts_left >0 and len(aliens) > 0:
         shooter = random.choice(aliens)
         alien_bullet = Actor("blaster2.png") 
         alien_bullet.pos = shooter.pos
         alien_bullets.append(alien_bullet)
     clock.schedule(alien_shoot, 3)
 
-
+def boss_shoot():
+    if  hearts_left >0 and boss != None:
+        BossBullet = Actor("bossbullet.png") 
+        BossBullet.pos = boss.pos
+        BossBullets.append(BossBullet)
+    clock.schedule(boss_shoot, random.randint(1,2))
+boss_shoot()
 def draw():
     screen.blit("space.jpg", (0, -100))
     if boss != None:
         boss.draw()
     for bullet in bullets:
         bullet.draw()
+    for BossBullet in BossBullets:
+        BossBullet.draw()
     for alien_bullet in alien_bullets:
         alien_bullet.draw()
     if hearts_left >0:
@@ -109,14 +117,16 @@ def update():
         boss.y +=0.3
         if boss.y > HEIGHT:
             boss = None
-            hearts_left -2
+            hearts_left -=2
+            alienspawn()
         for bullet in bullets[:]:
             if bullet.colliderect(boss):
                 health -= 2
                 bullets.remove(bullet)
         if health <= 0:
             boss = None
-            score += 1000
+            score += 50000
+            alienspawn()
     for bullet in bullets[:]:
         bullet.y -= 3
         if bullet.y < 0:
@@ -127,6 +137,15 @@ def update():
                 aliens.remove(alien)
                 bullets.remove(bullet)
                 score += 100
+    for BossBullet in BossBullets[:]:
+        BossBullet.y += 6
+        if BossBullet.y > HEIGHT:
+            BossBullets.remove(BossBullet)
+            continue
+        if BossBullet.colliderect(spaceship):
+            BossBullets.remove(BossBullet)
+            hearts_left = hearts_left - 1
+
     for alien_bullet in alien_bullets[:]:
         alien_bullet.y += 4
         if alien_bullet.y > HEIGHT:
